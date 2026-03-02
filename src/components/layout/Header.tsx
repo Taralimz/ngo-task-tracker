@@ -176,6 +176,8 @@ export function Header({ user, onLogout, onMenuToggle }: HeaderProps) {
           {searchQuery && (
             <button
               onClick={() => { setSearchQuery(''); setSearchResults([]); setShowSearchResults(false) }}
+              title="ล้างคำค้นหา"
+              aria-label="ล้างคำค้นหา"
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

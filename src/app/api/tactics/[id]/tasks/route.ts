@@ -98,7 +98,13 @@ export async function GET(
       orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
     })
 
-    return NextResponse.json(tasks)
+    // Map progressPercent to progress for frontend compatibility
+    const tasksWithProgress = tasks.map(task => ({
+      ...task,
+      progress: task.progressPercent,
+    }))
+
+    return NextResponse.json({ tasks: tasksWithProgress })
   } catch (error) {
     console.error('Get tasks error:', error)
     return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 })

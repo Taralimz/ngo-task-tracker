@@ -21,20 +21,19 @@ export function AutoLogoutWarning({ show, remainingSeconds, onStay, onLogout }: 
   const progressPercent = (remainingSeconds / 60) * 100
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center animate-fade-in">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-200/60 w-full max-w-sm mx-4 overflow-hidden animate-fade-in-up">
+    <div className="fixed bottom-4 right-4 z-[100] w-full max-w-sm px-4 sm:px-0 pointer-events-none animate-fade-in">
+      <div className="pointer-events-auto bg-white rounded-2xl shadow-2xl border border-gray-200/60 w-full overflow-hidden animate-fade-in-up">
         {/* Progress bar */}
         <div className="h-1.5 bg-gray-100">
-          <div
+          <progress
+            value={progressPercent}
+            max={100}
             className={cn(
-              'h-full transition-all duration-1000 ease-linear rounded-full',
-              isUrgent ? 'bg-red-500' : 'bg-amber-500'
+              'w-full h-full rounded-full overflow-hidden [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-1000 [&::-webkit-progress-value]:ease-linear [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-1000 [&::-moz-progress-bar]:ease-linear',
+              isUrgent
+                ? '[&::-webkit-progress-value]:bg-red-500 [&::-moz-progress-bar]:bg-red-500'
+                : '[&::-webkit-progress-value]:bg-amber-500 [&::-moz-progress-bar]:bg-amber-500'
             )}
-            style={{ width: `${progressPercent}%` }}
           />
         </div>
 

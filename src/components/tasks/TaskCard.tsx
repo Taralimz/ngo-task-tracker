@@ -83,12 +83,17 @@ export function TaskCard({ task, onClick, view = 'list' }: TaskCardProps) {
 
         {progress > 0 && (
           <div className="mt-2.5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
+            <progress
+              value={progress}
+              max={100}
               className={cn(
-                'h-full rounded-full transition-all duration-700 ease-smooth progress-animated',
-                task.status === 'DONE' ? 'bg-gradient-to-r from-green-400 to-green-500' : progress >= 80 ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-primary-400 to-primary-500'
+                'w-full h-full rounded-full overflow-hidden [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-700 [&::-webkit-progress-value]:ease-smooth [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-700 [&::-moz-progress-bar]:ease-smooth',
+                task.status === 'DONE'
+                  ? '[&::-webkit-progress-value]:bg-green-500 [&::-moz-progress-bar]:bg-green-500'
+                  : progress >= 80
+                    ? '[&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500'
+                    : '[&::-webkit-progress-value]:bg-primary-500 [&::-moz-progress-bar]:bg-primary-500'
               )}
-              style={{ width: `${progress}%` }}
             />
           </div>
         )}
@@ -201,12 +206,17 @@ export function TaskCard({ task, onClick, view = 'list' }: TaskCardProps) {
           {progress > 0 && (
             <div className="flex items-center gap-2">
               <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div
+                <progress
+                  value={progress}
+                  max={100}
                   className={cn(
-                    'h-full rounded-full transition-all duration-700 ease-smooth',
-                    task.status === 'DONE' ? 'bg-gradient-to-r from-green-400 to-green-500' : progress >= 80 ? 'bg-gradient-to-r from-blue-400 to-blue-500' : 'bg-gradient-to-r from-primary-400 to-primary-500'
+                    'w-full h-full rounded-full overflow-hidden [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-700 [&::-webkit-progress-value]:ease-smooth [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-700 [&::-moz-progress-bar]:ease-smooth',
+                    task.status === 'DONE'
+                      ? '[&::-webkit-progress-value]:bg-green-500 [&::-moz-progress-bar]:bg-green-500'
+                      : progress >= 80
+                        ? '[&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500'
+                        : '[&::-webkit-progress-value]:bg-primary-500 [&::-moz-progress-bar]:bg-primary-500'
                   )}
-                  style={{ width: `${progress}%` }}
                 />
               </div>
               <span className="text-xs text-gray-500 font-medium">{progress}%</span>

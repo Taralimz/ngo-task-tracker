@@ -30,8 +30,6 @@ body {
 /* ===== Scrollbar ===== */
 @layer utilities {
   .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #d1d5db transparent;
   }
   
   .scrollbar-thin::-webkit-scrollbar {
@@ -57,15 +55,15 @@ body {
   /* Glass Morphism */
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
     border: 1px solid var(--glass-border);
   }
 
   .glass-subtle {
     background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(8px) saturate(150%);
     -webkit-backdrop-filter: blur(8px) saturate(150%);
+    backdrop-filter: blur(8px) saturate(150%);
   }
 }
 
@@ -90,42 +88,42 @@ button:focus-visible {
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes fadeInScale {
   from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes slideInRight {
   from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  to { transform: none; opacity: 1; }
 }
 
 @keyframes slideOutRight {
-  from { transform: translateX(0); opacity: 1; }
+  from { transform: none; opacity: 1; }
   to { transform: translateX(100%); opacity: 0; }
 }
 
 @keyframes slideInLeft {
   from { transform: translateX(-20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  to { transform: none; opacity: 1; }
 }
 
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to { transform: none; opacity: 1; }
 }
 
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes shimmer {
@@ -169,8 +167,12 @@ button:focus-visible {
 }
 
 @keyframes overlayFadeIn {
-  from { opacity: 0; backdrop-filter: blur(0); }
-  to { opacity: 1; backdrop-filter: blur(4px); }
+  from { opacity: 0; -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0); }
+  to { opacity: 1; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+}
+
+.animate-spin-reverse-fast {
+  animation: spin 0.6s linear infinite reverse;
 }
 
 @keyframes spinnerDash {

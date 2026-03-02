@@ -95,14 +95,29 @@ export interface TaskDetail extends Task {
 // Auth user type - re-export from auth
 export type { AuthUser } from '@/lib/auth'
 
+// Task stats provided by the strategies API
+export interface TaskStats {
+  total: number
+  todo: number
+  inProgress: number
+  done: number
+  blocked: number
+  overdue: number
+  avgProgress: number
+}
+
 // Extended types with relations
 export type StrategyWithTactics = Strategy & {
   tactics: TacticWithKPIs[]
+  taskStats?: TaskStats
+  _count?: { tasks: number; tactics: number }
 }
 
 export type TacticWithKPIs = Tactic & {
   kpis: KPI[]
   strategy?: Strategy
+  taskStats?: TaskStats
+  _count?: { tasks: number; kpis: number }
 }
 
 export type KPIWithTactic = KPI & {

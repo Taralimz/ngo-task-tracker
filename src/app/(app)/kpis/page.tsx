@@ -97,12 +97,17 @@ function KPIValueModal({ kpi, isOpen, onClose, onSave }: KPIValueModalProps) {
         </div>
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">งวด (เดือน/ปี)</label>
+            <label htmlFor="kpi-period" className="block text-sm font-medium mb-1">งวด (เดือน/ปี)</label>
             <input
-              type="month"
+              id="kpi-period"
+              type="text"
+              inputMode="numeric"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
+              placeholder="YYYY-MM"
+              pattern="\\d{4}-\\d{2}"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
+              title="งวดเดือน/ปี"
               required
             />
           </div>
@@ -263,6 +268,8 @@ export default function KPIDashboardPage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
+              title="ล้างคำค้นหา"
+              aria-label="ล้างคำค้นหา"
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,9 +359,19 @@ export default function KPIDashboardPage() {
                       <span className="font-medium">{progress.percent}%</span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={cn('h-full transition-all', getProgressColor(progress.percent))}
-                        style={{ width: `${progress.percent}%` }}
+                      <progress
+                        value={progress.percent}
+                        max={100}
+                        className={cn(
+                          'w-full h-full rounded-full overflow-hidden [&::-webkit-progress-bar]:bg-gray-200 [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-300 [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-300',
+                          progress.percent >= 80
+                            ? '[&::-webkit-progress-value]:bg-green-500 [&::-moz-progress-bar]:bg-green-500'
+                            : progress.percent >= 50
+                              ? '[&::-webkit-progress-value]:bg-yellow-500 [&::-moz-progress-bar]:bg-yellow-500'
+                              : progress.percent >= 25
+                                ? '[&::-webkit-progress-value]:bg-orange-500 [&::-moz-progress-bar]:bg-orange-500'
+                                : '[&::-webkit-progress-value]:bg-red-500 [&::-moz-progress-bar]:bg-red-500'
+                        )}
                       />
                     </div>
                     <div className="flex items-center justify-between text-xs text-gray-500 mt-1">

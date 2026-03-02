@@ -229,6 +229,8 @@ function PermGroupModal({ group, users, permData, isOpen, onClose, onSave }: Per
                         checked={perms.every(p => formData.permissions.includes(p))}
                         onChange={() => toggleCategoryAll(perms)}
                         className="rounded"
+                        title={`เลือกทั้งหมดในหมวด ${category}`}
+                        aria-label={`เลือกทั้งหมดในหมวด ${category}`}
                         disabled={group?.isSystem}
                       />
                     </div>
@@ -374,7 +376,7 @@ export default function PermissionGroupsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold animate-fade-in-up tracking-tight">จัดการกลุ่มสิทธิ์</h1>
-          <p className="text-gray-500 mt-1 animate-fade-in-up" style={{ animationDelay: '50ms' }}>กำหนดสิทธิ์การเข้าถึงระบบตามกลุ่มผู้ใช้</p>
+          <p className="text-gray-500 mt-1 animate-fade-in-up">กำหนดสิทธิ์การเข้าถึงระบบตามกลุ่มผู้ใช้</p>
         </div>
         <Button className="btn-shine" onClick={() => { setSelectedGroup(null); setModalOpen(true) }}>
           + สร้างกลุ่มสิทธิ์ใหม่

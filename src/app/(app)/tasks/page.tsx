@@ -3,11 +3,44 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Badge, Button } from '@/components/ui'
 import { TaskList, TaskBoard, TaskDrawer, CreateTaskModal } from '@/components/tasks'
-import { Task, TaskStatus, StrategyWithTactics } from '@/types'
+import { Task, TaskStatus, TaskStats, StrategyWithTactics, TacticWithKPIs } from '@/types'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
 type ViewMode = 'list' | 'board'
+
+/** Mini status dots showing task breakdown */
+function MiniStatusDots({ stats }: { stats: TaskStats }) {
+  if (stats.total === 0) return null
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5">
+      {stats.done > 0 && (
+        <span className="flex items-center gap-0.5 text-[10px] text-green-600">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          {stats.done}
+        </span>
+      )}
+      {stats.inProgress > 0 && (
+        <span className="flex items-center gap-0.5 text-[10px] text-blue-600">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          {stats.inProgress}
+        </span>
+      )}
+      {stats.blocked > 0 && (
+        <span className="flex items-center gap-0.5 text-[10px] text-red-600">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+          {stats.blocked}
+        </span>
+      )}
+      {stats.todo > 0 && (
+        <span className="flex items-center gap-0.5 text-[10px] text-gray-500">
+          <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+          {stats.todo}
+        </span>
+      )}
+    </div>
+  )
+}
 type QuickFilter = 'all' | 'my_tasks' | 'overdue' | 'high_priority'
 
 export default function AllTasksPage() {
@@ -147,14 +180,21 @@ export default function AllTasksPage() {
     setPage(1)
   }
 
-  // Get tactic count per strategy
-  const getTaskCountByStrategy = (strategyId: number) => {
-    return tasks.filter(t => t.strategy?.id === strategyId).length
+  // Use real task counts from the strategies API (database-level, not paginated)
+  const getTaskCountByStrategy = (strategy: StrategyWithTactics) => {
+    return strategy.taskStats?.total ?? strategy._count?.tasks ?? 0
   }
 
-  const getTaskCountByTactic = (tacticId: number) => {
-    return tasks.filter(t => t.tactic?.id === tacticId).length
+  const getTaskCountByTactic = (tactic: TacticWithKPIs) => {
+    return tactic.taskStats?.total ?? tactic._count?.tasks ?? 0
   }
+
+  // Total tasks across all strategies (from DB, not paginated)
+  const allTasksTotal = useMemo(() => {
+    const fromStrategies = strategies.reduce((sum, s) => sum + (s.taskStats?.total ?? s._count?.tasks ?? 0), 0)
+    // Use strategies total if available, fall back to paginated total
+    return fromStrategies > 0 ? fromStrategies : totalTasks
+  }, [strategies, totalTasks])
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-8rem)] page-enter">
@@ -170,6 +210,8 @@ export default function AllTasksPage() {
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'ขยายเมนู' : 'ย่อเมนู'}
+            aria-label={sidebarCollapsed ? 'ขยายเมนู' : 'ย่อเมนู'}
             className="hidden lg:inline-flex p-1.5 hover:bg-gray-200 rounded-lg transition-all duration-200"
           >
             <svg className={cn('w-4 h-4 text-gray-500 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,11 +232,14 @@ export default function AllTasksPage() {
               )}
             >
               <span className="font-medium text-gray-700">ทั้งหมด</span>
-              <Badge variant="gray">{totalTasks}</Badge>
+              <Badge variant="gray">{allTasksTotal}</Badge>
             </button>
 
             {/* Strategy List */}
-            {strategies.map((strategy) => (
+            {strategies.map((strategy) => {
+              const strategyTotal = getTaskCountByStrategy(strategy)
+              const strategyStats = strategy.taskStats
+              return (
               <div key={strategy.id} className="border-b last:border-b-0">
                 {/* Strategy Header */}
                 <div className={cn(
@@ -204,6 +249,8 @@ export default function AllTasksPage() {
                   <div className="flex items-start">
                     <button
                       onClick={() => toggleStrategy(strategy.id)}
+                      title="ขยายหรือย่อยุทธศาสตร์"
+                      aria-label="ขยายหรือย่อยุทธศาสตร์"
                       className="p-2 mt-1 hover:bg-gray-100 rounded-lg transition-colors duration-200 flex-shrink-0"
                     >
                       <svg 
@@ -225,12 +272,16 @@ export default function AllTasksPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant="default">{strategy.code}</Badge>
-                          <span className="text-xs text-gray-400 font-medium">{getTaskCountByStrategy(strategy.id)} งาน</span>
+                          <span className="text-xs text-gray-400 font-medium">{strategyTotal} งาน</span>
                         </div>
                       </div>
                       <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed" title={strategy.name}>
                         {strategy.name}
                       </p>
+                      {/* Mini status indicators */}
+                      {strategyStats && strategyTotal > 0 && (
+                        <MiniStatusDots stats={strategyStats} />
+                      )}
                       {strategy.description && expandedStrategies.includes(strategy.id) && (
                         <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed animate-fade-in-up">
                           {strategy.description}
@@ -243,28 +294,41 @@ export default function AllTasksPage() {
                 {/* Tactics */}
                 {expandedStrategies.includes(strategy.id) && strategy.tactics && (
                   <div className="bg-gray-50/50 animate-fade-in-up border-l-2 border-gray-200 ml-5">
-                    {strategy.tactics.map((tactic) => (
-                      <button
-                        key={tactic.id}
-                        onClick={() => handleTacticClick(tactic.id)}
-                        className={cn(
-                          'w-full pl-4 pr-3 py-2.5 text-left hover:bg-gray-100/80 transition-all duration-200',
-                          tacticFilter === tactic.id && 'bg-primary-50 border-l-4 border-l-primary-400'
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">{tactic.code}</span>
-                          <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{getTaskCountByTactic(tactic.id)}</span>
-                        </div>
-                        <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed" title={tactic.name}>
-                          {tactic.name}
-                        </p>
-                      </button>
-                    ))}
+                    {strategy.tactics.map((tactic) => {
+                      const tacticTotal = getTaskCountByTactic(tactic)
+                      const tacticStats = tactic.taskStats
+                      return (
+                        <button
+                          key={tactic.id}
+                          onClick={() => handleTacticClick(tactic.id)}
+                          className={cn(
+                            'w-full pl-4 pr-3 py-2.5 text-left hover:bg-gray-100/80 transition-all duration-200',
+                            tacticFilter === tactic.id && 'bg-primary-50 border-l-4 border-l-primary-400'
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">{tactic.code}</span>
+                            <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{tacticTotal}</span>
+                          </div>
+                          <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed" title={tactic.name}>
+                            {tactic.name}
+                          </p>
+                          {/* Mini status indicators */}
+                          {tacticStats && tacticTotal > 0 && (
+                            <MiniStatusDots stats={tacticStats} />
+                          )}
+                          {/* KPI count */}
+                          {tactic._count && tactic._count.kpis > 0 && (
+                            <span className="text-[10px] text-gray-400 mt-1 inline-block">{tactic._count.kpis} KPIs</span>
+                          )}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
@@ -310,7 +374,7 @@ export default function AllTasksPage() {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between bg-white rounded-xl shadow-soft border border-gray-100 p-4 mb-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between bg-white rounded-xl shadow-soft border border-gray-100 p-4 mb-4 animate-fade-in-up">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* View Toggle */}
             <div className="flex items-center bg-gray-100/80 rounded-xl p-1">
@@ -347,6 +411,8 @@ export default function AllTasksPage() {
             {/* Status Filter */}
             <select
               value={statusFilter}
+              title="กรองตามสถานะ"
+              aria-label="กรองตามสถานะ"
               onChange={(e) => {
                 setStatusFilter(e.target.value as TaskStatus | 'ALL')
                 setPage(1)
@@ -363,6 +429,8 @@ export default function AllTasksPage() {
             {/* Org Filter */}
             <select
               value={orgFilter?.toString() || ''}
+              title="กรองตามหน่วยงาน"
+              aria-label="กรองตามหน่วยงาน"
               onChange={(e) => {
                 setOrgFilter(e.target.value ? parseInt(e.target.value) : null)
                 setPage(1)
@@ -401,6 +469,8 @@ export default function AllTasksPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
+                title="ล้างคำค้นหา"
+                aria-label="ล้างคำค้นหา"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -418,31 +488,31 @@ export default function AllTasksPage() {
             {orgFilter && (
               <Badge variant="default" className="flex items-center gap-1 bg-purple-100 text-purple-700">
                 🏢 {orgs.find(o => o.id === orgFilter)?.name}
-                <button onClick={() => setOrgFilter(null)} className="ml-1">×</button>
+                <button onClick={() => setOrgFilter(null)} title="ลบตัวกรองหน่วยงาน" aria-label="ลบตัวกรองหน่วยงาน" className="ml-1">×</button>
               </Badge>
             )}
             {strategyFilter && (
               <Badge variant="info" className="flex items-center gap-1">
                 ยุทธศาสตร์: {strategies.find(s => s.id === strategyFilter)?.code}
-                <button onClick={() => setStrategyFilter(null)} className="ml-1">×</button>
+                <button onClick={() => setStrategyFilter(null)} title="ลบตัวกรองยุทธศาสตร์" aria-label="ลบตัวกรองยุทธศาสตร์" className="ml-1">×</button>
               </Badge>
             )}
             {tacticFilter && (
               <Badge variant="info" className="flex items-center gap-1">
                 กลยุทธ์: {strategies.flatMap(s => s.tactics).find(t => t.id === tacticFilter)?.code}
-                <button onClick={() => setTacticFilter(null)} className="ml-1">×</button>
+                <button onClick={() => setTacticFilter(null)} title="ลบตัวกรองกลยุทธ์" aria-label="ลบตัวกรองกลยุทธ์" className="ml-1">×</button>
               </Badge>
             )}
             {statusFilter !== 'ALL' && (
               <Badge variant="gray" className="flex items-center gap-1">
                 สถานะ: {statusFilter === 'TO_DO' ? 'รอดำเนินการ' : statusFilter === 'IN_PROGRESS' ? 'กำลังดำเนินการ' : statusFilter === 'BLOCKED' ? 'ติดขัด' : 'เสร็จสิ้น'}
-                <button onClick={() => setStatusFilter('ALL')} className="ml-1">×</button>
+                <button onClick={() => setStatusFilter('ALL')} title="ลบตัวกรองสถานะ" aria-label="ลบตัวกรองสถานะ" className="ml-1">×</button>
               </Badge>
             )}
             {searchQuery && (
               <Badge variant="gray" className="flex items-center gap-1">
                 ค้นหา: "{searchQuery}"
-                <button onClick={() => setSearchQuery('')} className="ml-1">×</button>
+                <button onClick={() => setSearchQuery('')} title="ลบคำค้นหา" aria-label="ลบคำค้นหา" className="ml-1">×</button>
               </Badge>
             )}
             <button 
@@ -465,7 +535,7 @@ export default function AllTasksPage() {
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="skeleton h-20 rounded-xl" style={{ animationDelay: `${i * 100}ms` }} />
+                <div key={i} className="skeleton h-20 rounded-xl" />
               ))}
             </div>
           ) : viewMode === 'list' ? (

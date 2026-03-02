@@ -112,6 +112,8 @@ export function TaskList({ tasks, onTaskClick, onStatusChange }: TaskListProps) 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
+            title="เรียงลำดับรายการงาน"
+            aria-label="เรียงลำดับรายการงาน"
             className="text-sm border rounded-lg px-3 py-1.5"
           >
             {sortOptions.map((opt) => (
@@ -127,6 +129,8 @@ export function TaskList({ tasks, onTaskClick, onStatusChange }: TaskListProps) 
           <select
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value as any)}
+            title="จัดกลุ่มรายการงาน"
+            aria-label="จัดกลุ่มรายการงาน"
             className="text-sm border rounded-lg px-3 py-1.5"
           >
             <option value="none">ไม่จัดกลุ่ม</option>

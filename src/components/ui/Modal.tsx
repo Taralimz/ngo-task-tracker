@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
@@ -21,6 +22,11 @@ const sizeClasses = {
 
 export function Modal({ isOpen, onClose, title, children, size = 'md', className }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -38,9 +44,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', className
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div
@@ -60,6 +66,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', className
               <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
               <button
                 onClick={onClose}
+                title="ปิด"
+                aria-label="ปิด"
                 className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:rotate-90"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,6 +79,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', className
           <div className="p-6">{children}</div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { Badge, Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -60,6 +61,7 @@ interface ModalProps {
 }
 
 function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps) {
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -71,7 +73,11 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (item) {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  useEffect(() => {    if (item) {
       setFormData({
         code: item.code || '',
         name: item.name || '',
@@ -92,7 +98,7 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
     }
   }, [item, isOpen])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -171,7 +177,7 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
     kpi: 'from-emerald-500 to-teal-500',
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-overlay" onClick={onClose}>
       <div
         className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-elevated w-full max-w-md mx-4 animate-fade-in-scale"
@@ -204,6 +210,7 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-400 transition-all duration-200 ease-smooth"
+              placeholder="ระบุชื่อ"
               required
             />
           </div>
@@ -226,6 +233,7 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
                   value={formData.frequency}
                   onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
                   className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-400 transition-all duration-200 ease-smooth appearance-none cursor-pointer bg-white"
+                  title="ความถี่การวัด"
                 >
                   <option value="monthly">📆 รายเดือน</option>
                   <option value="quarterly">📅 รายไตรมาส</option>
@@ -243,6 +251,7 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-400 transition-all duration-200 ease-smooth resize-none"
               rows={3}
+              placeholder={type === 'kpi' ? 'คำจำกัดความของ KPI' : 'รายละเอียดเพิ่มเติม'}
             />
           </div>
           {item && (
@@ -267,7 +276,8 @@ function EditModal({ type, item, parentId, isOpen, onClose, onSave }: ModalProps
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -319,7 +329,7 @@ function StatusBar({ stats }: { stats: TaskStats }) {
   return (
     <div className="h-2 rounded-full overflow-hidden flex w-full bg-gray-100">
       {segments.map((seg, i) => seg.pct > 0 && (
-        <div key={i} className={cn('h-full transition-all duration-500', seg.color)} style={{ width: `${seg.pct}%` }} />
+        <div key={i} className={cn('h-full transition-all duration-500', seg.color)} role="presentation" aria-hidden="true" ref={(el) => { if (el) el.style.width = `${seg.pct}%` }} />
       ))}
     </div>
   )
@@ -465,7 +475,7 @@ export default function StrategiesPage() {
       </div>
 
       {/* Strategy Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-500 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+      <div className="flex items-center gap-4 text-xs text-gray-500 animate-fade-in-up [animation-delay:150ms]">
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-400" /> เสร็จ</span>
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-400" /> กำลังทำ</span>
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400" /> บล็อก</span>
@@ -539,6 +549,7 @@ export default function StrategiesPage() {
                         'p-2 rounded-lg transition-all duration-200',
                         isExpanded ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                       )}
+                      title={isExpanded ? 'ซ่อนกลยุทธ์' : 'แสดงกลยุทธ์'}
                     >
                       <svg className={cn('w-5 h-5 transition-transform duration-300 ease-spring', isExpanded && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -618,6 +629,7 @@ export default function StrategiesPage() {
                                 <button
                                   onClick={() => openModal('tactic', tactic, strategy.id)}
                                   className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                                  title="แก้ไขกลยุทธ์"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -629,6 +641,7 @@ export default function StrategiesPage() {
                                     'p-1.5 rounded-lg transition-all duration-200',
                                     isTacticExpanded ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:bg-gray-100'
                                   )}
+                                  title={isTacticExpanded ? 'ซ่อน KPI' : 'แสดง KPI'}
                                 >
                                   <svg className={cn('w-4 h-4 transition-transform duration-300 ease-spring', isTacticExpanded && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -674,6 +687,7 @@ export default function StrategiesPage() {
                                         <button
                                           onClick={() => openModal('kpi', kpi, tactic.id)}
                                           className="p-1 text-gray-300 hover:text-primary-600 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                          title="แก้ไข KPI"
                                         >
                                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

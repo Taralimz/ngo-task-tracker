@@ -129,23 +129,22 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children">
-        {statCards.map((stat, index) => (
+        {statCards.map((stat) => (
           <div
             key={stat.label}
             className={cn('p-4 rounded-2xl card-hover animate-fade-in-up', stat.color)}
-            style={{ animationDelay: `${index * 80}ms` }}
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-lg">{stat.icon}</span>
             </div>
-            <div className="text-2xl font-bold tracking-tight animate-count-up" style={{ animationDelay: `${index * 80 + 200}ms` }}>{stat.value}</div>
+            <div className="text-2xl font-bold tracking-tight animate-count-up">{stat.value}</div>
             <div className="text-sm opacity-70 font-medium">{stat.label}</div>
           </div>
         ))}
       </div>
 
       {/* Recent Tasks */}
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">งานล่าสุด</h2>
           <button
@@ -197,7 +196,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Strategic Overview */}
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">ภาพรวมยุทธศาสตร์</h2>
         <div className="space-y-4">
           {strategies.map((strategy) => (

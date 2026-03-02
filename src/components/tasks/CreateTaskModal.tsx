@@ -443,8 +443,7 @@ export function CreateTaskModal({
                           className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                         />
                         <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: team.color }}
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-primary-400"
                         />
                         <span className="truncate">{team.name}</span>
                         <span className="text-xs text-gray-400 ml-auto">({team._count.members})</span>

@@ -84,7 +84,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-4 border-primary-100" />
             <div className="absolute inset-0 rounded-full border-4 border-primary-500 border-t-transparent animate-spin" />
-            <div className="absolute inset-2 rounded-full border-4 border-primary-300 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.6s' }} />
+            <div className="absolute inset-2 rounded-full border-4 border-primary-300 border-b-transparent animate-spin-reverse-fast" />
           </div>
           <p className="text-gray-500 font-medium animate-pulse">กำลังโหลด...</p>
         </div>
@@ -110,9 +110,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           onMenuToggle={() => setMobileSidebarOpen((prev) => !prev)}
         />
         <main className="flex-1 p-4 sm:p-6 overflow-auto scrollbar-thin">
-          <div className="page-enter">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
       <AutoLogoutWarning

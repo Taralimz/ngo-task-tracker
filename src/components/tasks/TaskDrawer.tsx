@@ -218,6 +218,7 @@ export function TaskDrawer({ task, isOpen, onClose, onUpdate }: TaskDrawerProps)
                 value={detail?.status || task.status}
                 onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
                 className="text-sm font-medium bg-transparent border-0 focus:ring-0 cursor-pointer pr-6"
+                title="สถานะงาน"
               >
                 {statusOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -234,6 +235,7 @@ export function TaskDrawer({ task, isOpen, onClose, onUpdate }: TaskDrawerProps)
                 value={detail?.priority || task.priority}
                 onChange={(e) => handlePriorityChange(e.target.value as TaskPriority)}
                 className="text-sm font-medium bg-transparent border-0 focus:ring-0 cursor-pointer pr-6"
+                title="ลำดับความสำคัญ"
               >
                 {priorityOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -262,7 +264,9 @@ export function TaskDrawer({ task, isOpen, onClose, onUpdate }: TaskDrawerProps)
           <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
             <div
               className={cn('h-full rounded-full transition-all duration-500', progressColor)}
-              style={{ width: `${currentProgress}%` }}
+              ref={(el) => { if (el) el.style.width = `${currentProgress}%` }}
+              role="presentation"
+              aria-hidden="true"
             />
           </div>
           {currentProgress === 100 && (
@@ -505,6 +509,7 @@ export function TaskDrawer({ task, isOpen, onClose, onUpdate }: TaskDrawerProps)
                           value={newProgress}
                           onChange={(e) => setNewProgress(Number(e.target.value))}
                           className="w-24 accent-primary-500"
+                          title="ความคืบหน้า"
                         />
                         <span className={cn(
                           'text-sm font-bold min-w-[3rem] text-right',

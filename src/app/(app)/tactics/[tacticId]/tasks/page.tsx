@@ -160,6 +160,8 @@ export default function TacticTasksPage() {
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('list')}
+              title="รายการ"
+              aria-label="รายการ"
               className={cn(
                 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
                 viewMode === 'list'
@@ -173,6 +175,8 @@ export default function TacticTasksPage() {
             </button>
             <button
               onClick={() => setViewMode('board')}
+              title="บอร์ด"
+              aria-label="บอร์ด"
               className={cn(
                 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
                 viewMode === 'board'
@@ -189,6 +193,8 @@ export default function TacticTasksPage() {
           {/* Status Filter */}
           <select
             value={statusFilter}
+            title="กรองตามสถานะ"
+            aria-label="กรองตามสถานะ"
             onChange={(e) => setStatusFilter(e.target.value as TaskStatus | 'ALL')}
             className="text-sm border rounded-lg px-3 py-1.5"
           >
