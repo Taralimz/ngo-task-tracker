@@ -101,16 +101,16 @@ export function TaskCard({ task, onClick, view = 'list' }: TaskCardProps) {
     <div
       onClick={onClick}
       className={cn(
-        'bg-white rounded-xl border p-4 cursor-pointer card-hover group',
+        'bg-white rounded-xl border p-3 sm:p-4 cursor-pointer card-hover group',
         'hover:border-gray-300',
         overdue && 'border-red-200 bg-red-50/30',
         task.priority === 'URGENT' && 'border-l-4 border-l-red-500',
         task.priority === 'HIGH' && 'border-l-4 border-l-orange-500'
       )}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
         {/* Checkbox */}
-        <div className="pt-0.5">
+        <div className="pt-0.5 hidden sm:block">
           <div className={cn(
             'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300',
             task.status === 'DONE' ? 'bg-green-500 border-green-500 shadow-glow-success scale-100' : 'border-gray-300 group-hover:border-primary-400 group-hover:scale-110'
@@ -160,10 +160,10 @@ export function TaskCard({ task, onClick, view = 'list' }: TaskCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+        <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
           {/* Due date */}
           <div className={cn(
-            'text-sm flex items-center gap-1',
+            'text-xs sm:text-sm flex items-center gap-1',
             overdue ? 'text-red-600 font-medium' : 'text-gray-500'
           )}>
             {overdue && (

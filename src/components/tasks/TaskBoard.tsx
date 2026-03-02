@@ -77,7 +77,7 @@ export function TaskBoard({ tasks, onTaskClick, onStatusChange }: TaskBoardProps
           <div
             key={column.status}
             className={cn(
-              'flex-1 min-w-[300px] max-w-[350px] rounded-2xl flex flex-col transition-all duration-300',
+              'flex-1 min-w-[260px] sm:min-w-[300px] max-w-[350px] rounded-2xl flex flex-col transition-all duration-300',
               column.color,
               isDropTarget && 'ring-2 ring-primary-400 ring-offset-2 scale-[1.01]'
             )}

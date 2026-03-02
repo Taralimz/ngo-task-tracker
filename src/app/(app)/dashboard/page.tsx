@@ -114,12 +114,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 page-enter">
       {/* Page Header */}
-      <div className="flex items-center justify-between animate-fade-in-up">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in-up">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">แดชบอร์ด</h1>
           <p className="text-gray-500 mt-1">ภาพรวมของงานและความคืบหน้า</p>
         </div>
-        <Button onClick={() => setCreateModalOpen(true)} className="btn-shine">
+        <Button onClick={() => setCreateModalOpen(true)} className="btn-shine w-full sm:w-auto">
           <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -145,7 +145,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Tasks */}
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">งานล่าสุด</h2>
           <button
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Strategic Overview */}
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 p-4 sm:p-6 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">ภาพรวมยุทธศาสตร์</h2>
         <div className="space-y-4">
           {strategies.map((strategy) => (
@@ -213,7 +213,7 @@ export default function DashboardPage() {
                     onClick={() => router.push(`/tactics/${tactic.id}/tasks`)}
                     className="w-full text-left p-3 bg-gray-50/80 rounded-xl hover:bg-gray-100 hover:shadow-sm transition-all duration-200 group"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0 justify-between">
                       <div>
                         <Badge variant="info" size="sm">{tactic.code}</Badge>
                         <span className="ml-2 text-sm text-gray-700">{tactic.name}</span>

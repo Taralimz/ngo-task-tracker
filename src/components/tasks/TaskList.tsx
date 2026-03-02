@@ -106,7 +106,7 @@ export function TaskList({ tasks, onTaskClick, onStatusChange }: TaskListProps) 
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex items-center gap-4 pb-4 border-b">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 border-b">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">เรียงตาม:</span>
           <select
@@ -135,7 +135,7 @@ export function TaskList({ tasks, onTaskClick, onStatusChange }: TaskListProps) 
           </select>
         </div>
 
-        <div className="ml-auto text-sm text-gray-500">
+        <div className="sm:ml-auto text-sm text-gray-500">
           {tasks.length} งาน
         </div>
       </div>

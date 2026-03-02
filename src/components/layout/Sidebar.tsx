@@ -9,9 +9,11 @@ import { StrategyWithTactics } from '@/types'
 
 interface SidebarProps {
   strategies: StrategyWithTactics[]
+  mobileOpen?: boolean
+  onClose?: () => void
 }
 
-export function Sidebar({ strategies }: SidebarProps) {
+export function Sidebar({ strategies, mobileOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname()
   const [expandedStrategies, setExpandedStrategies] = useState<number[]>([])
   const [expandedTactics, setExpandedTactics] = useState<number[]>([])
@@ -44,9 +46,23 @@ export function Sidebar({ strategies }: SidebarProps) {
   }
 
   return (
-    <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200/60 h-screen overflow-y-auto scrollbar-thin transition-all duration-300">
+    <>
+      {mobileOpen && (
+        <button
+          aria-label="Close sidebar"
+          onClick={onClose}
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+        />
+      )}
+
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200/60 h-screen overflow-y-auto scrollbar-thin transition-transform duration-300 lg:relative lg:translate-x-0',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        )}
+      >
       {/* Logo */}
-      <div className="px-4 py-4 border-b border-gray-200/60">
+      <div className="px-4 py-4 border-b border-gray-200/60 flex items-start justify-between gap-2">
         <Link href="/dashboard" className="flex items-center gap-3 group">
           <div className="w-10 h-10 flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
             <Image src="/RSAT LOGO SQUARE.png" alt="RSAT" width={40} height={40} className="w-10 h-10 rounded-lg" />
@@ -56,6 +72,15 @@ export function Sidebar({ strategies }: SidebarProps) {
             <span className="text-[10px] text-gray-400 leading-tight">สมาคมฟ้าสีรุ้งแห่งประเทศไทย</span>
           </div>
         </Link>
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100"
+          aria-label="Close menu"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {/* Navigation */}
@@ -316,6 +341,7 @@ export function Sidebar({ strategies }: SidebarProps) {
           ))}
         </div>
       </nav>
-    </aside>
+      </aside>
+    </>
   )
 }

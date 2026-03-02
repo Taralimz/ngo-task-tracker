@@ -20,6 +20,7 @@ interface SearchResult {
 interface HeaderProps {
   user: AuthUser
   onLogout?: () => void
+  onMenuToggle?: () => void
 }
 
 const statusLabels: Record<string, string> = {
@@ -41,7 +42,7 @@ const priorityColors: Record<string, string> = {
   URGENT: 'text-red-500',
 }
 
-export function Header({ user, onLogout }: HeaderProps) {
+export function Header({ user, onLogout, onMenuToggle }: HeaderProps) {
   const router = useRouter()
   const [showDropdown, setShowDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -136,8 +137,18 @@ export function Header({ user, onLogout }: HeaderProps) {
   }
 
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 flex items-center justify-between px-6 sticky top-0 z-30 transition-all duration-300">
+    <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30 transition-all duration-300">
       <div className="flex items-center gap-4">
+        <button
+          onClick={onMenuToggle}
+          className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+          aria-label="Open menu"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
         {/* Search */}
         <div ref={searchRef} className="relative group">
           <svg
@@ -160,7 +171,7 @@ export function Header({ user, onLogout }: HeaderProps) {
             onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
             onKeyDown={handleSearchKeyDown}
             placeholder="ค้นหางาน... (Enter เพื่อดูทั้งหมด)"
-            className="pl-10 pr-10 py-2 w-64 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 focus:bg-white focus:w-80 focus:shadow-lg focus:shadow-primary-500/5 placeholder:text-gray-400"
+            className="pl-10 pr-10 py-2 w-44 sm:w-64 bg-gray-50/80 border border-gray-200/60 rounded-xl text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 focus:bg-white sm:focus:w-80 focus:shadow-lg focus:shadow-primary-500/5 placeholder:text-gray-400"
           />
           {searchQuery && (
             <button
@@ -175,7 +186,7 @@ export function Header({ user, onLogout }: HeaderProps) {
 
           {/* Search Results Dropdown */}
           {showSearchResults && (
-            <div className="absolute top-full left-0 mt-2 w-[28rem] bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-gray-200/60 overflow-hidden z-50 animate-fade-in-down">
+            <div className="absolute top-full left-0 mt-2 w-[calc(100vw-1.5rem)] sm:w-[28rem] max-w-[28rem] bg-white/95 backdrop-blur-xl rounded-xl shadow-elevated border border-gray-200/60 overflow-hidden z-50 animate-fade-in-down">
               {searchLoading ? (
                 <div className="px-4 py-6 text-center">
                   <div className="inline-block w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -245,7 +256,7 @@ export function Header({ user, onLogout }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Notifications */}
         <NotificationBell />
 

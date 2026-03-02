@@ -73,10 +73,10 @@ npm run dev
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | superadmin@ngo.org | password123 |
-| Admin | admin@ngo.org | password123 |
-| Zone Admin | zone.admin@ngo.org | password123 |
-| User | user@ngo.org | password123 |
+| Super Admin | superadmin@rsat.org | password123 |
+| Admin | admin@rsat.org | password123 |
+| Zone Admin | zone.admin@rsat.org | password123 |
+| User | user@rsat.org | password123 |
 
 ## 📁 โครงสร้างโปรเจค
 

@@ -157,11 +157,11 @@ export default function AllTasksPage() {
   }
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-8rem)] page-enter">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-8rem)] page-enter">
       {/* Strategic Framework Sidebar */}
       <div className={cn(
-        'bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden flex flex-col transition-all duration-400 ease-smooth',
-        sidebarCollapsed ? 'w-12' : 'w-72'
+        'bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden flex flex-col transition-all duration-400 ease-smooth w-full lg:w-72',
+        sidebarCollapsed && 'lg:w-12'
       )}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/80">
@@ -170,7 +170,7 @@ export default function AllTasksPage() {
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1.5 hover:bg-gray-200 rounded-lg transition-all duration-200"
+            className="hidden lg:inline-flex p-1.5 hover:bg-gray-200 rounded-lg transition-all duration-200"
           >
             <svg className={cn('w-4 h-4 text-gray-500 transition-transform duration-300', sidebarCollapsed && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -272,12 +272,12 @@ export default function AllTasksPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4 animate-fade-in-up">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 animate-fade-in-up">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">งานทั้งหมด</h1>
             <p className="text-gray-500 mt-1">จัดการและติดตามงานทั้งหมดในระบบ</p>
           </div>
-          <Button onClick={() => setCreateModalOpen(true)} className="btn-shine">
+          <Button onClick={() => setCreateModalOpen(true)} className="btn-shine w-full sm:w-auto">
             <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -286,7 +286,7 @@ export default function AllTasksPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-5 gap-3 mb-4 stagger-children">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-4 stagger-children">
           <div className="bg-white rounded-xl border border-gray-100 p-3 card-hover animate-fade-in-up">
             <p className="text-xs text-gray-500 font-medium">ทั้งหมด</p>
             <p className="text-xl font-bold text-gray-900">{taskStats.total}</p>
@@ -310,8 +310,8 @@ export default function AllTasksPage() {
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between bg-white rounded-xl shadow-soft border border-gray-100 p-4 mb-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between bg-white rounded-xl shadow-soft border border-gray-100 p-4 mb-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {/* View Toggle */}
             <div className="flex items-center bg-gray-100/80 rounded-xl p-1">
               <button
@@ -379,7 +379,7 @@ export default function AllTasksPage() {
           </div>
 
           {/* Search */}
-          <div className="relative group">
+          <div className="relative group w-full lg:w-auto">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors duration-200 group-focus-within:text-primary-500"
               fill="none"
@@ -396,7 +396,7 @@ export default function AllTasksPage() {
                 setSearchQuery(e.target.value)
                 setPage(1)
               }}
-              className="pl-10 pr-4 py-1.5 text-sm border border-gray-200 rounded-xl w-64 transition-all duration-300 focus:w-80 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 hover:border-gray-300"
+              className="pl-10 pr-4 py-1.5 text-sm border border-gray-200 rounded-xl w-full lg:w-64 transition-all duration-300 lg:focus:w-80 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 hover:border-gray-300"
             />
             {searchQuery && (
               <button
@@ -461,7 +461,7 @@ export default function AllTasksPage() {
         )}
 
         {/* Task View */}
-        <div className="flex-1 bg-white rounded-2xl shadow-soft border border-gray-100 p-6 overflow-y-auto scrollbar-thin">
+        <div className="flex-1 bg-white rounded-2xl shadow-soft border border-gray-100 p-3 sm:p-6 overflow-y-auto scrollbar-thin">
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -485,7 +485,7 @@ export default function AllTasksPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
             <Button
               variant="outline"
               size="sm"
