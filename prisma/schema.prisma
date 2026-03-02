@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// ORGANIZATION & USER
+// =============================================
+
+model Org {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  zone      String?  @db.VarChar(100)
+  province  String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users     User[]
+  kpiValues KPIValue[]
+  tasks     Task[]
+
+  @@map("orgs")
+}
+
+enum UserRole {
+  superadmin
+  admin
+  admin_zone
+  user_org
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  fullName     String   @map("full_name") @db.VarChar(200)
+  role         UserRole @default(user_org)
+  orgId        Int?     @map("org_id")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  org                Org?              @relation(fields: [orgId], references: [id])
+  tasksCreated       Task[]            @relation("TaskCreator")
+  taskAssignments    TaskAssignee[]
+  taskUpdates        TaskUpdate[]
+  comments           Comment[]
+  attachments        Attachment[]
+  activityLogs       ActivityLog[]
+  kpiValuesCreated   KPIValue[]
+  notifications      Notification[]
+  teamMemberships    TeamMember[]
+  permissionGroups   UserPermissionGroup[]
+
+  @@map("users")
+}
+
+// =============================================
+// TEAMS (Work Groups)
+// =============================================
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  color       String   @default("#3B82F6") @db.VarChar(20)
+  isDefault   Boolean  @default(false) @map("is_default")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members         TeamMember[]
+  taskAssignments TaskTeamAssignee[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  teamId    Int      @map("team_id")
+  userId    Int      @map("user_id")
+  role      String   @default("member") @db.VarChar(50) // leader, member
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TaskTeamAssignee {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  teamId    Int      @map("team_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, teamId])
+  @@map("task_team_assignees")
+}
+
+// =============================================
+// PERMISSION GROUPS
+// =============================================
+
+model PermissionGroup {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(200)
+  description String?  @db.Text
+  permissions Json     @default("[]") // Array of permission strings
+  isSystem    Boolean  @default(false) @map("is_system") // Cannot be deleted
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users UserPermissionGroup[]
+
+  @@map("permission_groups")
+}
+
+model UserPermissionGroup {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @map("user_id")
+  permissionGroupId Int      @map("permission_group_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionGroupId])
+  @@map("user_permission_groups")
+}
+
+// =============================================
+// STRATEGIC LAYER
+// =============================================
+
+model Strategy {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tactics Tactic[]
+  tasks   Task[]
+
+  @@map("strategies")
+}
+
+model Tactic {
+  id          Int      @id @default(autoincrement())
+  strategyId  Int      @map("strategy_id")
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  strategy Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  kpis     KPI[]
+  tasks    Task[]
+
+  @@map("tactics")
+}
+
+enum KPIFrequency {
+  monthly
+  quarterly
+  yearly
+}
+
+model KPI {
+  id             Int          @id @default(autoincrement())
+  tacticId       Int          @map("tactic_id")
+  code           String       @unique @db.VarChar(50)
+  name           String       @db.VarChar(255)
+  unit           String       @db.VarChar(100)
+  frequency      KPIFrequency @default(monthly)
+  definition     String?      @db.Text
+  targetRuleJson Json?        @map("target_rule_json")
+  active         Boolean      @default(true)
+  sortOrder      Int          @default(0) @map("sort_order")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  tactic    Tactic     @relation(fields: [tacticId], references: [id], onDelete: Cascade)
+  values    KPIValue[]
+  taskKpis  TaskKPI[]
+
+  @@map("kpis")
+}
+
+model KPIValue {
+  id           Int      @id @default(autoincrement())
+  kpiId        Int      @map("kpi_id")
+  orgId        Int?     @map("org_id")
+  province     String?  @db.VarChar(100)
+  periodYYYYMM String   @map("period_yyyymm") @db.VarChar(7)
+  value        Decimal  @db.Decimal(15, 2)
+  note         String?  @db.Text
+  createdById  Int      @map("created_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  kpi       KPI   @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  org       Org?  @relation(fields: [orgId], references: [id])
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  @@map("kpi_values")
+}
+
+// =============================================
+// WORK LAYER (ClickUp-like)
+// =============================================
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(200)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  lists List[]
+
+  @@map("folders")
+}
+
+model List {
+  id        Int      @id @default(autoincrement())
+  folderId  Int?     @map("folder_id")
+  name      String   @db.VarChar(200)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  folder Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tasks  Task[]
+
+  @@map("lists")
+}
+
+enum TaskStatus {
+  TO_DO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Task {
+  id              Int          @id @default(autoincrement())
+  listId          Int?         @map("list_id")
+  orgId           Int?         @map("org_id")
+  strategyId      Int          @map("strategy_id")
+  tacticId        Int          @map("tactic_id")
+  title           String       @db.VarChar(500)
+  description     String?      @db.Text
+  status          TaskStatus   @default(TO_DO)
+  priority        TaskPriority @default(NORMAL)
+  startDate       DateTime?    @map("start_date") @db.Date
+  dueDate         DateTime?    @map("due_date") @db.Date
+  progressPercent Int          @default(0) @map("progress_percent")
+  createdById     Int          @map("created_by_id")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  list            List?              @relation(fields: [listId], references: [id], onDelete: SetNull)
+  org             Org?               @relation(fields: [orgId], references: [id])
+  strategy        Strategy           @relation(fields: [strategyId], references: [id])
+  tactic          Tactic             @relation(fields: [tacticId], references: [id])
+  createdBy       User               @relation("TaskCreator", fields: [createdById], references: [id])
+  taskKpis        TaskKPI[]
+  assignees       TaskAssignee[]
+  teamAssignees   TaskTeamAssignee[]
+  updates         TaskUpdate[]
+  comments        Comment[]
+  attachments     Attachment[]
+
+  @@map("tasks")
+}
+
+enum ContributionType {
+  DIRECT
+  SUPPORT
+}
+
+model TaskKPI {
+  id                       Int              @id @default(autoincrement())
+  taskId                   Int              @map("task_id")
+  kpiId                    Int              @map("kpi_id")
+  contributionType         ContributionType @default(DIRECT) @map("contribution_type")
+  expectedContributionNote String?          @map("expected_contribution_note") @db.Text
+  createdAt                DateTime         @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  kpi  KPI  @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, kpiId])
+  @@map("task_kpis")
+}
+
+model TaskAssignee {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@map("task_assignees")
+}
+
+model TaskUpdate {
+  id              Int        @id @default(autoincrement())
+  taskId          Int        @map("task_id")
+  userId          Int        @map("user_id")
+  status          TaskStatus
+  progressPercent Int        @map("progress_percent")
+  doneNote        String?    @map("done_note") @db.Text
+  issueNote       String?    @map("issue_note") @db.Text
+  nextStep        String?    @map("next_step") @db.Text
+  createdAt       DateTime   @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("task_updates")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  userId    Int      @map("user_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  userId    Int      @map("user_id")
+  url       String   @db.VarChar(500)
+  label     String?  @db.VarChar(255)
+  fileSize  Int?     @map("file_size")
+  mimeType  String?  @map("mime_type") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("attachments")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  entityType  String   @map("entity_type") @db.VarChar(50)
+  entityId    Int      @map("entity_id")
+  actorUserId Int      @map("actor_user_id")
+  action      String   @db.VarChar(50)
+  beforeJson  Json?    @map("before_json")
+  afterJson   Json?    @map("after_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  actor User @relation(fields: [actorUserId], references: [id])
+
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+// =============================================
+// NOTIFICATIONS
+// =============================================
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_UPDATED
+  TASK_COMMENT
+  TASK_DUE_SOON
+  TASK_OVERDUE
+  KPI_REMINDER
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int              @map("user_id")
+  type      NotificationType
+  title     String           @db.VarChar(255)
+  message   String           @db.Text
+  link      String?          @db.VarChar(500)
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
